@@ -14,13 +14,18 @@ jobs:
       API_URLS: ${{ vars.API_URLS }}
 
     steps:
-    - name: Check Multiple APIs status
+    - name: Check Multiple APIs status and measure latency
       run: |
         IFS=',' read -r -a urls <<< "${API_URLS}"
         for url in "${urls[@]}"; do
+          start_time=$(date +%s%3N)  # ミリ秒単位で現在時刻を取得
           response=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" -X GET "$url")
+          end_time=$(date +%s%3N)  # ミリ秒単位で現在時刻を取得
+          latency=$((end_time - start_time))
+
           http_status=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-          echo "Response Status for $url $http_status"
+          echo "Response Status for $url: $http_status, Latency: ${latency}ms"
+          
           # 200-399の範囲を成功と見なす
           if [[ $http_status -lt 200 || $http_status -gt 399 ]]; then
             echo "API at $url is down, unstable, or returned an error status" >&2
