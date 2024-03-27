@@ -2,7 +2,7 @@ name: Multiple API Monitoring in Single Script
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # 15分ごとに実行
+    - cron: '*/5 * * * *'  # 5分ごとに実行
   push:
     branches:
       - main
@@ -20,7 +20,7 @@ jobs:
         for url in "${urls[@]}"; do
           response=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" -X GET "$url")
           http_status=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-          echo "Response Status for $url: $http_status"
+          echo "Response Status for $url $http_status"
           # 200-399の範囲を成功と見なす
           if [[ $http_status -lt 200 || $http_status -gt 399 ]]; then
             echo "API at $url is down, unstable, or returned an error status" >&2
